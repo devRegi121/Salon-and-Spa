@@ -98,6 +98,23 @@ const staffAppointments = [
     status: "Pending",
   },
 ];
+function showView(viewId) {
+  // Hide all views
+  const views = document.querySelectorAll(".view");
+  views.forEach((view) => (view.style.display = "none"));
+
+  // Show the selected view
+  const targetView = document.getElementById(viewId);
+  if (targetView) {
+    targetView.style.display = "block";
+
+    // If showing the profile, render appointments
+    if (viewId === "user-profile") {
+      renderAppointments(upcoming, "upcomingAppointments");
+      renderAppointments(past, "pastAppointments");
+    }
+  }
+}
 
 // Show the selected panel only
 function showStaffPanel(panelId) {
@@ -125,7 +142,11 @@ function renderAppointments() {
     list.appendChild(li);
   });
 }
+function goBackToDashboard() {
+  document.getElementById("user-profile").style.display = "none";
 
+  document.getElementById("user-dashboard").style.display = "block";
+}
 // Mark appointment as completed
 function markCompleted(id) {
   const appt = staffAppointments.find((a) => a.id === id);
@@ -150,31 +171,55 @@ function updateStaffInfo(e) {
 }
 
 let selectedService = "";
+function getSubcategories(category) {
+  const subcategories = {
+    Hair: ["Haircut", "Coloring", "Styling"],
+    Nails: ["Manicure", "Pedicure", "Nail Art"],
+    Massage: ["Swedish", "Deep Tissue", "Aromatherapy"],
+    Facial: ["Exfoliation", "Hydration", "Anti-aging"],
+  };
 
-function selectService(service) {
-  selectedService = service;
+  return (
+    `<option disabled selected>Select a service type</option>` +
+    (subcategories[category] || [])
+      .map((sub) => `<option value="${sub}">${sub}</option>`)
+      .join("")
+  );
+}
+
+function selectService(category) {
   document.getElementById(
     "calendarTitle"
-  ).innerText = `Select date for ${service}`;
+  ).textContent = `Book a ${category} service`;
+  document.getElementById("subcategorySelect").innerHTML =
+    getSubcategories(category);
   document.getElementById("calendarModal").style.display = "block";
+  fillTimeSlots();
 }
 
 function confirmAppointment() {
+  const category = document.getElementById("calendarTitle").textContent;
+  const subcategory = document.getElementById("subcategorySelect").value;
   const date = document.getElementById("appointmentDate").value;
-  if (!date) {
-    alert("Please select a date");
+  const time = document.getElementById("timeSlotSelect").value;
+
+  if (!subcategory || !date || !time) {
+    alert("Please select all fields.");
     return;
   }
 
-  let appointments = JSON.parse(
-    localStorage.getItem("upcomingAppointments") || "[]"
-  );
-  appointments.push({ id: Date.now(), date, service: selectedService });
-  localStorage.setItem("upcomingAppointments", JSON.stringify(appointments));
+  const newAppointment = {
+    id: Date.now(), // unique ID
+    date,
+    hour: time,
+    service: `${category} - ${subcategory}`,
+  };
 
-  alert(`${selectedService} booked for ${date}`);
+  upcoming.push(newAppointment);
+  renderAppointments(upcoming, "upcomingAppointments");
+
+  alert("Appointment booked!");
   document.getElementById("calendarModal").style.display = "none";
-  document.getElementById("appointmentDate").value = "";
 }
 // Dummy upcoming list
 document.addEventListener("DOMContentLoaded", () => {
@@ -184,8 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
     Massage: ["Swedish", "Deep Tissue", "Aromatherapy"],
     Facial: ["Exfoliation", "Hydration", "Anti-aging"],
   };
-
-  let upcoming = [];
 
   function openCalendar(category) {
     const modal = document.getElementById("calendarModal");
@@ -409,3 +452,276 @@ function logout() {
 // Render on load
 renderAppointments();
 showStaffPanel("schedulePanel");
+
+let services = [
+  { id: 1, name: "Haircut", price: 30 },
+  { id: 2, name: "Massage", price: 60 },
+];
+
+let users = [
+  { id: 1, name: "Alice", role: "customer" },
+  { id: 2, name: "Bob", role: "staff" },
+  { id: 3, name: "Carol", role: "customer" },
+];
+
+// Show selected panel only
+function showPanel(panelId) {
+  document.querySelectorAll(".admin-panel").forEach((p) => {
+    p.style.display = p.id === panelId ? "block" : "none";
+  });
+}
+
+// Render services list
+function renderServices() {
+  const list = document.getElementById("serviceList");
+  list.innerHTML = "";
+  services.forEach((service) => {
+    const li = document.createElement("li");
+    li.textContent = `${service.name} - $${service.price.toFixed(2)}`;
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Remove";
+    removeBtn.style.marginLeft = "1rem";
+    removeBtn.onclick = () => {
+      services = services.filter((s) => s.id !== service.id);
+      renderServices();
+    };
+    li.appendChild(removeBtn);
+    list.appendChild(li);
+  });
+}
+
+// Add new service
+function addService() {
+  const nameInput = document.getElementById("newServiceName");
+  const priceInput = document.getElementById("newServicePrice");
+  const name = nameInput.value.trim();
+  const price = parseFloat(priceInput.value);
+
+  if (!name || isNaN(price) || price < 0) {
+    alert("Please enter a valid name and price.");
+    return;
+  }
+  const newId = services.length
+    ? Math.max(...services.map((s) => s.id)) + 1
+    : 1;
+  services.push({ id: newId, name, price });
+  nameInput.value = "";
+  priceInput.value = "";
+  renderServices();
+}
+
+// Render users list for role assignment
+function renderUsers() {
+  const list = document.getElementById("userList");
+  list.innerHTML = "";
+  users.forEach((user) => {
+    const li = document.createElement("li");
+    li.textContent = `${user.name} - Role: ${user.role}`;
+
+    // Toggle role button
+    const toggleBtn = document.createElement("button");
+    toggleBtn.textContent =
+      user.role === "customer" ? "Make Staff" : "Make Customer";
+    toggleBtn.style.marginLeft = "1rem";
+    toggleBtn.onclick = () => {
+      user.role = user.role === "customer" ? "staff" : "customer";
+      renderUsers();
+    };
+
+    // Remove user button
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Remove";
+    removeBtn.style.marginLeft = "1rem";
+    removeBtn.onclick = () => {
+      if (confirm(`Remove user ${user.name}?`)) {
+        users = users.filter((u) => u.id !== user.id);
+        renderUsers();
+      }
+    };
+
+    li.appendChild(toggleBtn);
+    li.appendChild(removeBtn);
+    list.appendChild(li);
+  });
+}
+
+// Placeholder report generation functions
+function generateReport(type) {
+  alert(`Generating ${type} report... (functionality coming soon)`);
+}
+
+// Placeholder export functions
+function exportReport(format) {
+  alert(
+    `Exporting report as ${format.toUpperCase()}... (functionality coming soon)`
+  );
+}
+let upcoming = [
+  { id: 1, date: "2025-06-01", hour: "2:00 PM", service: "Haircut" },
+  { id: 2, date: "2025-06-05", hour: "12:00 PM", service: "Facial" },
+];
+
+let past = [{ id: 3, date: "2025-05-01", hour: "3:00 PM", service: "Massage" }];
+
+// Panel switching function
+function showUserPanel(panelId) {
+  // Hide all panels
+  const panels = document.querySelectorAll(".user-panel");
+  panels.forEach((panel) => (panel.style.display = "none"));
+
+  // Show selected panel
+  document.getElementById(panelId).style.display = "block";
+
+  // If showing appointments panel, render the appointments
+  if (panelId === "appointmentsPanel") {
+    renderAppointments(upcoming, "upcomingAppointments");
+    renderAppointments(past, "pastAppointments");
+  }
+}
+
+function renderAppointments(list, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = "";
+  if (list.length === 0) {
+    const li = document.createElement("li");
+    li.innerHTML = '<em style="color: #bbaaa0;">No appointments</em>';
+    li.style.cssText =
+      "padding: 0.5rem 0; border-bottom: 1px solid rgba(186, 170, 160, 0.3);";
+    container.appendChild(li);
+    return;
+  }
+
+  list.forEach((app) => {
+    let li = document.createElement("li");
+    li.style.cssText =
+      "padding: 0.5rem 0; border-bottom: 1px solid rgba(186, 170, 160, 0.3); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;";
+
+    const appointmentInfo = `<div><strong>${app.date}</strong> - ${app.hour} - ${app.service}</div>`;
+    const buttons =
+      containerId === "upcomingAppointments"
+        ? `<div style="display: flex; gap: 0.25rem;">
+        <button onclick="cancelAppointment(${app.id})" style="background:rgb(139, 122, 149); color: white; border: none; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">Cancel</button>
+        <button onclick="rescheduleAppointment(${app.id})" style="background:rgb(112, 88, 119); color: white; border: none; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">Reschedule</button>
+      </div>`
+        : "";
+
+    li.innerHTML = appointmentInfo + buttons;
+    container.appendChild(li);
+  });
+}
+
+function cancelAppointment(id) {
+  const confirmBox = confirm(
+    "Are you sure you want to cancel this appointment?"
+  );
+  if (confirmBox) {
+    upcoming = upcoming.filter((app) => app.id !== id);
+    renderAppointments(upcoming, "upcomingAppointments");
+    alert("Appointment cancelled.");
+  }
+}
+
+function rescheduleAppointment(id) {
+  let newDate = prompt("Enter a new date (YYYY-MM-DD):");
+  if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+    let app = upcoming.find((app) => app.id === id);
+    if (app) {
+      app.date = newDate;
+      renderAppointments(upcoming, "upcomingAppointments");
+      alert("Appointment rescheduled to " + newDate);
+    }
+  } else if (newDate) {
+    alert("Invalid date format. Use YYYY-MM-DD.");
+  }
+}
+function fillTimeSlots() {
+  const timeSelect = document.getElementById("timeSlotSelect");
+  timeSelect.innerHTML =
+    '<option value="" disabled selected>Select a time</option>'; // reset options
+
+  const startHour = 9; // 9 AM
+  const endHour = 18; // 6 PM
+  const intervalMinutes = 30;
+
+  for (let hour = startHour; hour < endHour; hour++) {
+    for (let min = 0; min < 60; min += intervalMinutes) {
+      const timeStr = formatTime(hour, min);
+      const option = document.createElement("option");
+      option.value = timeStr;
+      option.textContent = timeStr;
+      timeSelect.appendChild(option);
+    }
+  }
+}
+
+function changePassword() {
+  let current = document.getElementById("currentPassword").value;
+  let newPass = document.getElementById("newPassword").value;
+
+  if (!current || !newPass) {
+    alert("Please fill in both password fields.");
+    return;
+  }
+
+  // Clear the fields
+  document.getElementById("currentPassword").value = "";
+  document.getElementById("newPassword").value = "";
+
+  alert("Password updated successfully!");
+}
+
+// Star rating functionality
+let selectedRating = 0;
+
+// Initialize star rating when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".star").forEach((star) => {
+    star.addEventListener("click", () => {
+      selectedRating = parseInt(star.dataset.star);
+      document.querySelectorAll(".star").forEach((s) => {
+        if (parseInt(s.dataset.star) <= selectedRating) {
+          s.style.color = "#e0a96d";
+        } else {
+          s.style.color = "#bbaaa0";
+        }
+      });
+    });
+  });
+});
+
+function submitFeedback() {
+  const description = document.getElementById("feedbackDescription").value;
+
+  if (selectedRating === 0) {
+    alert("Please select a star rating.");
+    return;
+  }
+
+  if (!description.trim()) {
+    alert("Please enter your feedback.");
+    return;
+  }
+
+  alert(
+    `Feedback submitted successfully!\nRating: ${selectedRating} stars\nFeedback: ${description}`
+  );
+
+  // Clear the form
+  selectedRating = 0;
+  document.getElementById("feedbackDescription").value = "";
+  document.querySelectorAll(".star").forEach((s) => {
+    s.style.color = "#bbaaa0";
+  });
+}
+
+function logout() {
+  // You can modify this to match your navigation system
+  window.location.href = "index.html";
+}
+
+// Show the first panel by default
+document.addEventListener("DOMContentLoaded", function () {
+  showUserPanel("passwordPanel");
+});
