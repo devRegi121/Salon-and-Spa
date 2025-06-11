@@ -1,4 +1,4 @@
-<!-- Full HTML Template Structure -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -20,6 +20,26 @@
       href="https://unpkg.com/swiper/swiper-bundle.min.css"
     />
     <style>
+      .inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  .inventory-table th,
+  .inventory-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+  .qty-input {
+    width: 60px;
+    text-align: center;
+  }
+  .admin-panel button {
+    padding: 4px 10px;
+    margin: 2px;
+    cursor: pointer;
+  }
       .swiper-slide img {
         width: 100%;
         height: 180px;
@@ -42,6 +62,8 @@
       }
     </style>
   </head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <body>
     <!--Log-in/Register-->
     <section id="login-section" class="view active">
@@ -88,28 +110,7 @@
         <div class="nav-right">
           <a href="#about-section">About Us</a>
           <a href="#contact-section">Contact</a>
-          <button
-            onclick="showView('user-profile')"
-            class="profile-button"
-            style="
-              background-color: #97889c;
-              border: none;
-              padding: 6px 10px;
-              border-radius: 50%;
-              color: white;
-              font-weight: 600;
-              font-size: 0.9em;
-              cursor: pointer;
-              transition: background-color 0.3s ease;
-              margin-left: 15px;
-              width: 32px;
-              height: 32px;
-            "
-            onmouseover="this.style.backgroundColor='#97889c'"
-            onmouseout="this.style.backgroundColor='#97889c'"
-          >
-            P
-          </button>
+          <a href="profile.html" class="profile-button">Profile</a>
           <a href="#services-section" class="book-button">Book</a>
         </div>
       </nav>
@@ -279,13 +280,13 @@
       <div class="back-button" id="back-to-dashboard">&larr; Go Back</div>
     </section>
 
-    <!-- Staff & Admin dashboards (placeholders) -->
+    <!-- Staff dashboard -->
     <section
       id="staff-dashboard"
       class="view"
       style="
         padding: 2rem;
-        background: #a193a5;
+        background: #906f98;
         color: #f5eee6;
         border-radius: 16px;
         max-width: 600px;
@@ -301,7 +302,7 @@
         <button
           onclick="showStaffPanel('schedulePanel')"
           style="
-            background: #665b6f;
+            background: #927c66;
             color: #ffffff;
             border: none;
             padding: 0.4rem 0.8rem;
@@ -315,7 +316,7 @@
         <button
           onclick="showStaffPanel('updateInfoPanel')"
           style="
-            background: #665b6f;
+            background: #927c66;
             color: #ffffff;
             border: none;
             padding: 0.4rem 0.8rem;
@@ -380,8 +381,8 @@
             type="submit"
             style="
               margin-top: 1rem;
-              background: #665b6f;
-              color: #fcfcfc;
+              background: #bf97d6;
+              color: #ffffff;
               border: none;
               padding: 0.4rem 1rem;
               border-radius: 6px;
@@ -399,8 +400,8 @@
         style="
           margin-top: 2rem;
           background: transparent;
-          border: 1px solid #7e6786;
-          color: #ffffff;
+          border: 1px solid #e0a96d;
+          color: #e0a96d;
           padding: 0.4rem 0.8rem;
           border-radius: 6px;
           font-size: 0.9rem;
@@ -412,312 +413,12 @@
       </button>
     </section>
     <section
-      id="user-profile"
-      class="view"
-      style="
-        padding: 2rem;
-        background: #ffffff;
-        color: #4a314a;
-        border-radius: 16px;
-        max-width: 600px;
-        margin: auto;
-        font-family: 'Segoe UI', sans-serif;
-      "
-    >
-      <h1 style="margin-bottom: 1rem; font-size: 1.8rem">
-        Welcome to Your Profile
-      </h1>
-
-      <!-- Nav Buttons -->
-      <nav
-        style="
-          margin-bottom: 1.5rem;
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        "
-      >
-        <button
-          onclick="showUserPanel('passwordPanel')"
-          style="
-            background: #d9bac9;
-            color: #ffffff;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-          "
-        >
-          Change Password
-        </button>
-        <button
-          onclick="showUserPanel('appointmentsPanel')"
-          style="
-            background: #d9bac9;
-            color: #ffffff;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-          "
-        >
-          Appointments
-        </button>
-        <button
-          onclick="showUserPanel('feedbackPanel')"
-          style="
-            background: #d9bac9;
-            color: #ffffff;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-          "
-        >
-          Feedback
-        </button>
-      </nav>
-
-      <!-- Change Password Panel -->
-      <div id="passwordPanel" class="user-panel">
-        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem">
-          Change Password
-        </h2>
-        <input
-          type="password"
-          id="currentPassword"
-          placeholder="Current Password"
-          style="
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            border: none;
-            background-color: #f9f4f0;
-            color: #000000;
-          "
-        />
-        <input
-          type="password"
-          id="newPassword"
-          placeholder="New Password"
-          style="
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            border: none;
-            background-color: #f9f4f0;
-            color: #000000;
-          "
-        />
-        <button
-          onclick="changePassword()"
-          style="
-            background: #d9bac9;
-            color: #3b2f2f;
-            border: none;
-            padding: 0.4rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            font-weight: bold;
-          "
-        >
-          Update Password
-        </button>
-      </div>
-
-      <!-- Appointments Panel -->
-      <div id="appointmentsPanel" class="user-panel" style="display: none">
-        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem">
-          Upcoming Appointments
-        </h2>
-        <ul
-          id="upcomingAppointments"
-          style="
-            list-style: none;
-            padding: 0;
-            margin: 0 0 1rem 0;
-            background: rgba(233, 219, 201, 0.1);
-            border-radius: 8px;
-            padding: 1rem;
-          "
-        ></ul>
-
-        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem">
-          Past Appointments
-        </h2>
-        <ul
-          id="pastAppointments"
-          style="
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            background: rgba(233, 219, 201, 0.1);
-            border-radius: 8px;
-            padding: 1rem;
-          "
-        ></ul>
-      </div>
-
-      <!-- Feedback Panel -->
-      <div id="feedbackPanel" class="user-panel" style="display: none">
-        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem">
-          Submit Feedback
-        </h2>
-        <div id="star-rating" style="margin-bottom: 1rem; text-align: center">
-          <span
-            class="star"
-            data-star="1"
-            style="
-              font-size: 1.8rem;
-              cursor: pointer;
-              color: #bbaaa0;
-              transition: color 0.2s;
-              margin: 0 2px;
-            "
-            >★</span
-          >
-          <span
-            class="star"
-            data-star="2"
-            style="
-              font-size: 1.8rem;
-              cursor: pointer;
-              color: #bbaaa0;
-              transition: color 0.2s;
-              margin: 0 2px;
-            "
-            >★</span
-          >
-          <span
-            class="star"
-            data-star="3"
-            style="
-              font-size: 1.8rem;
-              cursor: pointer;
-              color: #bbaaa0;
-              transition: color 0.2s;
-              margin: 0 2px;
-            "
-            >★</span
-          >
-          <span
-            class="star"
-            data-star="4"
-            style="
-              font-size: 1.8rem;
-              cursor: pointer;
-              color: #bbaaa0;
-              transition: color 0.2s;
-              margin: 0 2px;
-            "
-            >★</span
-          >
-          <span
-            class="star"
-            data-star="5"
-            style="
-              font-size: 1.8rem;
-              cursor: pointer;
-              color: #bbaaa0;
-              transition: color 0.2s;
-              margin: 0 2px;
-            "
-            >★</span
-          >
-        </div>
-        <textarea
-          id="feedbackDescription"
-          placeholder="Your feedback..."
-          style="
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            border: none;
-            background-color: #f9f4f0;
-            color: #000000;
-            min-height: 80px;
-            resize: vertical;
-          "
-        ></textarea>
-        <button
-          onclick="submitFeedback()"
-          style="
-            background: #d9bac9;
-            color: #ffffff;
-            border: none;
-            padding: 0.4rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            font-weight: bold;
-          "
-        >
-          Submit Feedback
-        </button>
-      </div>
-
-      <!-- Navigation Buttons -->
-      <div
-        style="
-          margin-top: 2rem;
-          display: flex;
-          gap: 1rem;
-          justify-content: space-between;
-        "
-      >
-        <button
-          style="
-            background: transparent;
-            border: 1px solid #d9bac9;
-            color: #735d77;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-          "
-          onclick="goBackToDashboard()"
-        >
-          ← Back to Dashboard
-        </button>
-        <button
-          style="
-            background: transparent;
-            border: 1px solid #d9bac9;
-            color: #7e6588;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-          "
-          onclick="logout()"
-        >
-          Logout
-        </button>
-      </div>
-    </section>
-
-    <script>
-      // User Profile JavaScript Functions
-
-      function goBackToDashboard() {
-        // You can modify this to match your navigation system
-        window.location.href = "index.html#user-dashboard";
-      }
-    </script>
-    <section
       id="admin-dashboard"
       class="view"
       style="
         padding: 2rem;
         color: #f5eee6;
-        background: #3b2f2f;
+        background: #a98cb0;
         border-radius: 12px;
         max-width: 900px;
         margin: 2rem auto;
@@ -825,17 +526,28 @@
 
       <!-- Inventory Panel -->
       <div id="inventoryPanel" class="admin-panel" style="display: none">
-        <h2>Inventory Management</h2>
-        <p><em>Coming soon</em></p>
-      </div>
+  <h2>Inventory Management</h2>
+  <table id="inventoryTable" class="inventory-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Category</th>
+        <th>Quantity</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>
 
-      <!-- Logout -->
+
       <button
         onclick="logout()"
         style="
           margin-top: 2rem;
-          background: #584a5f;
-          color: #f8f8f8;
+      background: #81648d;
+      color: #ffffff;
           border: none;
           padding: 0.6rem 1.2rem;
           border-radius: 8px;
@@ -847,7 +559,6 @@
       </button>
     </section>
 
-    <!-- Location Section -->
     <div
       id="addUserModal"
       style="
@@ -885,7 +596,229 @@
       <button onclick="hideAddUserModal()">Cancel</button>
     </div>
     <script>
+
+      const inventoryItems = [
+    { name: "Shampoo", category: "Hair", quantity: 30 },
+    { name: "Hair Dye - Black", category: "Hair", quantity: 12 },
+    { name: "Styling Gel", category: "Hair", quantity: 18 },
+    { name: "Nail Polish - Red", category: "Nails", quantity: 22 },
+    { name: "Cuticle Oil", category: "Nails", quantity: 15 },
+    { name: "Massage Oil - Lavender", category: "Massage", quantity: 10 },
+    { name: "Facial Cream", category: "Facial", quantity: 25 },
+    { name: "Hydrating Mask", category: "Facial", quantity: 8 },
+  ];
+
+  function renderInventory() {
+    const tbody = document.querySelector("#inventoryTable tbody");
+    tbody.innerHTML = "";
+
+    inventoryItems.forEach((item, index) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.category}</td>
+        <td>
+          <input
+            type="number"
+            min="0"
+            value="${item.quantity}"
+            data-index="${index}"
+            class="qty-input"
+          />
+        </td>
+        <td>
+          <button onclick="adjustQuantity(${index}, 1)">+</button>
+          <button onclick="adjustQuantity(${index}, -1)">-</button>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+
+    document.querySelectorAll(".qty-input").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        const newVal = parseInt(e.target.value);
+        if (!isNaN(newVal) && newVal >= 0) {
+          inventoryItems[idx].quantity = newVal;
+        } else {
+          e.target.value = inventoryItems[idx].quantity;
+        }
+      });
+    });
+  }
+
+  function adjustQuantity(index, delta) {
+    const item = inventoryItems[index];
+    item.quantity = Math.max(0, item.quantity + delta);
+    renderInventory();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderInventory();
+  });
       // Sample data
+      let services = [
+        { id: 1, name: "Haircut", price: 30 },
+        { id: 2, name: "Massage", price: 60 },
+      ];
+
+      let users = [
+        { id: 1, name: "Alice", role: "customer" },
+        { id: 2, name: "Bob", role: "staff" },
+        { id: 3, name: "Carol", role: "customer" },
+      ];
+
+      // Show selected panel only
+      function showPanel(panelId) {
+        document.querySelectorAll(".admin-panel").forEach((p) => {
+          p.style.display = p.id === panelId ? "block" : "none";
+        });
+      }
+
+      // Render services list
+      function renderServices() {
+        const list = document.getElementById("serviceList");
+        list.innerHTML = "";
+        services.forEach((service) => {
+          const li = document.createElement("li");
+          li.textContent = `${service.name} - $${service.price.toFixed(2)}`;
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "Remove";
+          removeBtn.style.marginLeft = "1rem";
+          removeBtn.onclick = () => {
+            services = services.filter((s) => s.id !== service.id);
+            renderServices();
+          };
+          li.appendChild(removeBtn);
+          list.appendChild(li);
+        });
+      }
+
+      // Add new service
+      function addService() {
+        const nameInput = document.getElementById("newServiceName");
+        const priceInput = document.getElementById("newServicePrice");
+        const name = nameInput.value.trim();
+        const price = parseFloat(priceInput.value);
+
+        if (!name || isNaN(price) || price < 0) {
+          alert("Please enter a valid name and price.");
+          return;
+        }
+        const newId = services.length
+          ? Math.max(...services.map((s) => s.id)) + 1
+          : 1;
+        services.push({ id: newId, name, price });
+        nameInput.value = "";
+        priceInput.value = "";
+        renderServices();
+      }
+
+      // Render users list for role assignment
+      function renderUsers() {
+        const list = document.getElementById("userList");
+        list.innerHTML = "";
+        users.forEach((user) => {
+          const li = document.createElement("li");
+          li.textContent = `${user.name} - Role: ${user.role}`;
+
+          // Toggle role button
+          const toggleBtn = document.createElement("button");
+          toggleBtn.textContent =
+            user.role === "customer" ? "Make Staff" : "Make Customer";
+          toggleBtn.style.marginLeft = "1rem";
+          toggleBtn.onclick = () => {
+            user.role = user.role === "customer" ? "staff" : "customer";
+            renderUsers();
+          };
+
+          // Remove user button
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "Remove";
+          removeBtn.style.marginLeft = "1rem";
+          removeBtn.onclick = () => {
+            if (confirm(`Remove user ${user.name}?`)) {
+              users = users.filter((u) => u.id !== user.id);
+              renderUsers();
+            }
+          };
+
+          li.appendChild(toggleBtn);
+          li.appendChild(removeBtn);
+          list.appendChild(li);
+        });
+      }
+
+      // Placeholder report generation functions
+  async function generateReport(type) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let title = "";
+    let content = [];
+
+    if (type === "revenue") {
+      title = "Revenue Report";
+      content = [
+        ["Month", "Revenue ($)"],
+        ["January", "3200"],
+        ["February", "2800"],
+        ["March", "4100"],
+        ["April", "3700"],
+      ];
+    } else if (type === "services") {
+      title = "Services Report";
+      content = [
+        ["Category", "Service Name"],
+        ["Hair", "Haircut"],
+        ["Hair", "Coloring"],
+        ["Hair", "Styling"],
+        ["Nails", "Manicure"],
+        ["Nails", "Pedicure"],
+        ["Nails", "Nail Art"],
+        ["Massage", "Swedish"],
+        ["Massage", "Deep Tissue"],
+        ["Massage", "Aromatherapy"],
+        ["Facial", "Exfoliation"],
+        ["Facial", "Hydration"],
+        ["Facial", "Anti-aging"],
+      ];
+    } else if (type === "staffPerformance") {
+      title = "Staff Performance Report";
+      content = [
+        ["Staff Name", "Appointments", "Avg Rating"],
+        ["Alice", "48", "4.7"],
+        ["Bob", "53", "4.8"],
+        ["Charlie", "45", "4.6"],
+        ["Diana", "39", "4.9"],
+      ];
+    } else {
+      alert("Unknown report type.");
+      return;
+    }
+
+    // Generate PDF
+    doc.setFontSize(18);
+    doc.text(title, 20, 20);
+    doc.setFontSize(12);
+
+    let startY = 30;
+    content.forEach((row, i) => {
+      const y = startY + i * 10;
+      doc.text(row.join(" | "), 20, y);
+    });
+
+    doc.save(`${type}_report.pdf`);
+  }
+
+      // Placeholder export functions
+      function exportReport(format) {
+        alert(
+          `Exporting report as ${format.toUpperCase()}... (functionality coming soon)`
+        );
+      }
 
       // Logout: redirect to login page
       function logout() {
@@ -929,8 +862,6 @@
         document.getElementById("newUserRole").value = "customer";
       }
 
-      // Dummy appointments data
-
       // Initial render
       renderServices();
       renderUsers();
@@ -943,3 +874,4 @@
     <script src="script.js"></script>
   </body>
 </html>
+
