@@ -1,538 +1,413 @@
-/* === Reset & Global Styles === */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("login-form");
+  const roleSelect = document.getElementById("role-select");
+  const views = document.querySelectorAll(".view");
+  document.getElementById("back-to-dashboard").addEventListener("click", () => {
+    document.getElementById("booking-page").classList.remove("active");
+    document.getElementById("user-dashboard").classList.add("active");
+  });
+
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const role = roleSelect.value;
+    views.forEach((view) => view.classList.remove("active"));
+    document.getElementById(`${role}-dashboard`).classList.add("active");
+  });
+
+  const swiper = new Swiper(".swiper-container", {
+    loop: true,
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+    slidesPerView: 1,
+    spaceBetween: 20,
+    breakpoints: {
+      640: { slidesPerView: 1 },
+      768: { slidesPerView: 2 },
+      1024: { slidesPerView: 3 },
+    },
+  });
+
+  const services = [
+    { name: "Haircut", price: "$30", image: "images/hair.jpg" },
+    { name: "Facial", price: "$50", image: "images/face.jpg" },
+    { name: "Massage", price: "$70", image: "images/massage.jpg" },
+    { name: "Nails", price: "$30", image: "images/nails.jpg" },
+  ];
+
+  const serviceCardsContainer = document.getElementById("service-cards");
+  services.forEach((service) => {
+    const card = document.createElement("div");
+    card.className = "swiper-slide";
+    card.innerHTML = `
+        <img src="${service.image}" alt="${service.name}" style="width:100%; border-radius:10px;">
+        <h3>${service.name}   ${service.price}</h3>
+      `;
+    card.addEventListener("click", () => {
+      const detailsContainer = document.getElementById("service-details");
+
+
+
+  
+      detailsContainer.innerHTML = "";
+
+
+      const detailCard = document.createElement("div");
+      detailCard.style.background = "rgba(255, 255, 255, 0.15)";
+      detailCard.style.backdropFilter = "blur(8px)";
+      detailCard.style.borderRadius = "10px";
+      detailCard.style.padding = "1rem";
+      detailCard.style.color = "white";
+      detailCard.style.textAlign = "center";
+      detailCard.style.boxShadow = "0 5px 15px rgba(0,0,0,0.1)";
+      detailCard.innerHTML = `
+    <h2>${service.name} Services</h2>
+    <p>Price: ${service.price}</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Details about ${service.name} services go here.</p>
+  `;
+
+      detailsContainer.appendChild(detailCard);
+
+
+      detailCard.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  const bookingForm = document.getElementById("booking-form");
+  const bookingSuccess = document.getElementById("booking-success");
+  bookingForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    bookingSuccess.classList.remove("hidden");
+    setTimeout(() => bookingSuccess.classList.add("hidden"), 3000);
+  });
+});
+
+// Dummy appointments (normally fetched from backend)
+const staffAppointments = [
+  {
+    id: 1,
+    client: "Alice",
+    time: "10:00 AM",
+    service: "Hair",
+    status: "Pending",
+  },
+  {
+    id: 2,
+    client: "Bob",
+    time: "11:30 AM",
+    service: "Massage",
+    status: "Pending",
+  },
+];
+
+
+function showStaffPanel(panelId) {
+  document.querySelectorAll(".staff-panel").forEach((p) => {
+    p.style.display = p.id === panelId ? "block" : "none";
+  });
 }
 
-body {
-  background: #f8f8f8;
-  color: #a992b3;
-  overflow-x: hidden;
+// Render the appointments list
+function renderAppointments() {
+  const list = document.getElementById("appointmentList");
+  list.innerHTML = "";
+
+  staffAppointments.forEach((appt) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${appt.client}</strong> - ${appt.service} at ${appt.time} 
+      [<em>${appt.status}</em>]
+      ${
+        appt.status === "Pending"
+          ? `<button onclick="markCompleted(${appt.id})">Mark as Done</button>`
+          : ""
+      }
+    `;
+    list.appendChild(li);
+  });
 }
 
-html {
-  scroll-behavior: smooth;
+// Mark appointment as completed
+function markCompleted(id) {
+  const appt = staffAppointments.find((a) => a.id === id);
+  if (appt) appt.status = "Completed";
+  renderAppointments();
 }
 
-/* === Utility === */
-.hidden {
-  display: none;
+// Handle info update
+function updateStaffInfo(e) {
+  e.preventDefault();
+  const name = document.getElementById("staffName").value;
+  const phone = document.getElementById("staffPhone").value;
+  const specialties = Array.from(
+    document.querySelectorAll('#updateInfoPanel input[type="checkbox"]:checked')
+  ).map((cb) => cb.value);
+
+  alert(
+    `Info updated!\nName: ${name}\nPhone: ${phone}\nSpecialties: ${specialties.join(
+      ", "
+    )}`
+  );
 }
 
-/* === Views === */
-.view {
-  display: none;
-  padding: 2rem;
-  min-height: 100vh;
+let selectedService = "";
+
+function selectService(service) {
+  selectedService = service;
+  document.getElementById(
+    "calendarTitle"
+  ).innerText = `Select date for ${service}`;
+  document.getElementById("calendarModal").style.display = "block";
 }
 
-.view.active {
-  display: block;
-  animation: fadeIn 0.6s ease-out;
-}
-.social-icons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 1rem;
-  gap: 1rem;
-}
-.find-us {
-  color: white;
-  font-size: 1.5rem;
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.social-item {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: #ffffff;
-  font-size: 1rem;
-}
-
-.social-item svg {
-  width: 24px;
-  height: 24px;
-  fill: #ffffff;
-  flex-shrink: 0;
-}
-
-/* === Animations === */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+function confirmAppointment() {
+  const date = document.getElementById("appointmentDate").value;
+  if (!date) {
+    alert("Please select a date");
+    return;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  let appointments = JSON.parse(
+    localStorage.getItem("upcomingAppointments") || "[]"
+  );
+  appointments.push({ id: Date.now(), date, service: selectedService });
+  localStorage.setItem("upcomingAppointments", JSON.stringify(appointments));
+
+  alert(`${selectedService} booked for ${date}`);
+  document.getElementById("calendarModal").style.display = "none";
+  document.getElementById("appointmentDate").value = "";
+}
+// Dummy upcoming list
+document.addEventListener("DOMContentLoaded", () => {
+  const subcategories = {
+    Hair: ["Haircut", "Coloring", "Styling"],
+    Nails: ["Manicure", "Pedicure", "Nail Art"],
+    Massage: ["Swedish", "Deep Tissue", "Aromatherapy"],
+    Facial: ["Exfoliation", "Hydration", "Anti-aging"],
+  };
+
+  let upcoming = [];
+
+  function openCalendar(category) {
+    const modal = document.getElementById("calendarModal");
+    const title = document.getElementById("calendarTitle");
+    const select = document.getElementById("subcategorySelect");
+    const dateInput = document.getElementById("appointmentDate");
+    const timeSelect = document.getElementById("timeSlotSelect");
+
+    title.textContent = `Book a ${
+      category.charAt(0).toUpperCase() + category.slice(1)
+    } service`;
+
+
+    select.innerHTML =
+      '<option value="" disabled selected>Select a type</option>';
+    const options = subcategories[category];
+
+    if (options && options.length) {
+      options.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+    } else {
+      console.error(`No subcategories found for category: ${category}`);
+    }
+    timeSelect.innerHTML =
+      '<option value="" disabled selected>Select a time</option>';
+    const startHour = 9; // 9 AM
+    const endHour = 17; // 5 PM
+    const intervalMinutes = 30;
+
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let min = 0; min < 60; min += intervalMinutes) {
+        const timeStr = formatTime(hour, min);
+        const option = document.createElement("option");
+        option.value = timeStr;
+        option.textContent = timeStr;
+        timeSelect.appendChild(option);
+      }
+    }
+    dateInput.value = "";
+    timeSelect.value = "";
+    modal.dataset.category = category;
+    modal.style.display = "block";
   }
-}
 
-@keyframes slideIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
+  function formatTime(hour24, minute) {
+    const period = hour24 >= 12 ? "PM" : "AM";
+    const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+    const minStr = minute < 10 ? `0${minute}` : minute;
+    return `${hour12}:${minStr} ${period}`;
   }
-  to {
-    transform: scale(1);
-    opacity: 1;
+
+  function confirmAppointment() {
+    const modal = document.getElementById("calendarModal");
+    const subcategory = document.getElementById("subcategorySelect").value;
+    const date = document.getElementById("appointmentDate").value;
+    const time = document.getElementById("timeSlotSelect").value;
+
+    if (!subcategory) return alert("Please choose a service type.");
+    if (!date) return alert("Please choose a date.");
+    if (!time) return alert("Please choose a time slot.");
+
+    upcoming.push({ id: Date.now(), service: subcategory, date, time });
+
+    alert(`Appointment booked:\n${subcategory} on ${date} at ${time}`);
+    closeModal();
   }
-}
 
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
+  function closeModal() {
+    document.getElementById("calendarModal").style.display = "none";
   }
-  10%,
-  90% {
-    opacity: 1;
-    transform: translateY(0);
+
+
+  document.querySelectorAll(".swiper-slide").forEach((card) => {
+    card.addEventListener("click", () => {
+      const category = card.getAttribute("data-category");
+      openCalendar(category);
+    });
+  });
+
+
+  window.confirmAppointment = confirmAppointment;
+  window.closeModal = closeModal;
+});
+
+let isRegistering = false;
+
+function toggleAuthMode() {
+  isRegistering = !isRegistering;
+
+  document.getElementById("formTitle").textContent = isRegistering
+    ? "Register"
+    : "Login";
+  document.getElementById("submitBtn").textContent = isRegistering
+    ? "Register"
+    : "Login";
+  document.getElementById("toggleModeBtn").textContent = isRegistering
+    ? "Login"
+    : "Register";
+
+  const adminOption = document.querySelector(
+    '#role-select option[value="admin"]'
+  );
+  adminOption.disabled = isRegistering;
+
+  document.getElementById("login-form").reset();
+}
+
+function handleAuth(event) {
+  event.preventDefault();
+
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const role = document.getElementById("role-select").value;
+
+  if (!username || !password) {
+    alert("Please enter both username and password.");
+    return;
   }
-  100% {
-    opacity: 0;
-    transform: translateY(-20px);
+
+  if (isRegistering) {
+    if (role === "admin") {
+      //alert("You cannot register as an admin.");
+      return;
+    }
+
+    //alert(`Registered ${username} as ${role}.`);
+
+    // Redirect after register
+    if (role === "staff") {
+      switchToView("staff-dashboard");
+    } else {
+      switchToView("user-dashboard");
+    }
+
+    isRegistering = false;
+    toggleAuthMode();
+  } else {
+    //alert(`Logged in as ${username} (${role})`);
+
+    // Redirect after login
+    if (role === "staff") {
+      switchToView("staff-dashboard");
+    } else if (role === "admin") {
+      switchToView("admin-dashboard");
+    } else {
+      switchToView("user-dashboard");
+    }
   }
+
+  document.getElementById("login-form").reset();
 }
 
-@keyframes slideUpFadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeSlideIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-25px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* === Form Elements === */
-input,
-select,
-button {
-  width: 100%;
-  padding: 0.75rem;
-  margin: 0.5rem 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-button {
-  background: #9e7fa6;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background: #caabd2;
-}
-
-/* === Login Box === */
-.login-box {
-  position: relative;
-  max-width: 400px;
-  margin: 5rem auto;
-  padding: 2rem;
-  background: rgba(255 255 255 / 0.2);
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.7s ease;
-}
-#login-section {
-  position: relative;
-  overflow: hidden;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #000;
-}
-
-#login-bg-video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-  filter: brightness(0.5); /* optional*/
-}
-/* === Navbar === */
-.user-navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px); /* Safari support */
-  border-bottom: 1px solid #e2e2e2;
-  position: fixed;
-  top: 0;
-  z-index: 1000;
-  font-weight: 600;
-  color: white;
-}
-.login-box h2 {
-  background: linear-gradient(90deg, #fff, #ccc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: floatIn 1s ease forwards;
-  text-shadow: 0 0 2px #9e7fa6;
-}
-
-.user-navbar .nav-left {
-  font-weight: 700;
-  font-size: 1.5rem;
-  color: #ffffff;
-}
-
-.user-navbar .nav-right a {
-  margin-left: 1.5rem;
-  text-decoration: none;
-  font-weight: 500;
-  color: #ffffff;
-  transition: color 0.3s;
-}
-
-.user-navbar .nav-right a:hover {
-  color: #ffffff;
-}
-
-.user-navbar a.book-button {
-  background-color: #9e7fa6;
-  color: #ffffff !important;
-  padding: 0.4rem 1.1rem;
-  border-radius: 20px;
-  font-weight: 700;
-}
-
-.user-navbar a.book-button:hover {
-  background-color: #9e7fa6;
-}
-.custom-dropdown {
-  position: relative;
-  width: 100%;
-  margin-bottom: 15px;
-  font-family: inherit;
-  font-size: 16px;
-  color: #333; /* Text color inside dropdown */
-}
-
-.dropdown-btn {
-  width: 100%;
-  padding: 10px 15px;
-  background: #fff;
-  border: 1.5px solid #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: left;
-  color: #333;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dropdown-btn:hover,
-.dropdown-btn:focus {
-  border-color: #9e7fa6;
-  box-shadow: 0 0 8px #9e7fa6;
-  outline: none;
-}
-
-.dropdown-menu {
-  list-style: none;
-  padding: 0;
-  margin: 5px 0 0;
-  border: 1.5px solid #ccc;
-  border-radius: 8px;
-  background: #fff;
-  color: #333; /* Text color in dropdown list */
-  position: absolute;
-  width: 100%;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-  z-index: 100;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.custom-dropdown.open .dropdown-menu {
-  max-height: 200px;
-  opacity: 1;
-  overflow-y: auto;
-}
-
-.dropdown-menu li {
-  padding: 10px 15px;
-  cursor: pointer;
-  user-select: none;
-}
-.dropdown-menu li:hover {
-  background-color: #9c82a4;
-  color: white;
-}
-
-/* === Welcome & Info Sections === */
-#welcome-text,
-.welcome-description,
-.select-service-label {
-  text-align: center;
-  margin: 0 auto;
-  max-width: 600px;
-  padding: 0 1rem;
-}
-
-.welcome-text {
-  text-align: center;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeSlideIn 4s ease forwards;
-  animation-delay: 2s;
-  font-weight: 700;
-  font-size: 2.75rem;
-  margin-top: 10rem;
-  margin-bottom: 1rem;
-  color: #ffffff;
-  line-height: 1.2;
-  letter-spacing: 1px;
-}
-
-.welcome-description {
-  font-size: 1.15rem;
-  color: #b5b5b5;
-  margin-top: 3rem;
-  margin-bottom: 8rem;
-  line-height: 1.6;
-  font-weight: 400;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: slideUpFadeIn 5s ease forwards;
-  animation-delay: 2s;
-}
-
-.select-service-label {
-  font-weight: 600;
-  font-size: 1.6rem;
-  margin-top: 3rem;
-  margin-bottom: 1.5rem;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-}
-
-.info-section {
-  padding: 3rem 1.5rem;
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.info-section h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #ffffff;
-}
-
-.info-section p {
-  font-size: 1.1rem;
-  color: #ffffff;
-  line-height: 1.6;
-  margin-bottom: 6rem;
-}
-
-/* === Parallax Background Section === */
-.parallax-section {
-  background-image: url("images/parallax.jpg");
-  background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  position: relative;
-  height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  filter: blur(5px);
-}
-
-.parallax-section::after {
-  content: "";
-  filter: blur(5px);
-  position: absolute;
-  inset: 0;
-}
-
-.parallax-content {
-  position: relative;
-  z-index: 1;
-  color: #ffffff;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-/* === User Dashboard === */
-#user-dashboard {
-  background-image: url("images/parallax.jpg");
-  background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  min-height: 150vh;
-  position: relative;
-  color: white;
-  padding: 2rem 1rem 4rem;
-  overflow: visible;
-  z-index: 1;
-}
-
-#user-dashboard::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("images/parallax.jpg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-color: rgba(255, 255, 255, 0.2);
-  filter: blur(5px);
-  opacity: 1;
-  z-index: 1;
-  pointer-events: none;
-}
-
-#user-dashboard > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* === Swiper === */
-.swiper-container {
-  width: 100%;
-  padding: 2rem 0;
-  margin-bottom: 4rem;
-}
-
-.swiper-slide {
-  background: rgba(255, 255, 255, 0.15); /* translucent white */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  padding: 1rem;
-  transition: transform 0.3s ease, background-color 0.3s ease;
-  color: white;
-}
-
-.swiper-slide:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.swiper-slide h3,
-.swiper-slide p {
-  margin: 10px 0;
-  color: #000;
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  color: #fff;
-  font-size: 16px;
-  text-align: center;
-  overflow: visible;
-}
-
-/* === Popup === */
-.popup {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #705877;
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 6px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  animation: fadeInOut 3s ease forwards;
-}
-
-/* === Contact Section === */
-#contact-section {
-  position: relative;
-  z-index: 10;
-  background: transparent;
-  color: #000000;
-  max-width: 800px;
-  border-radius: 8px;
-}
-
-.service-section {
-  display: none;
-  padding: 2rem;
-  margin-top: 2rem;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  border-radius: 10px;
-  color: white;
-  text-align: center;
-}
-
-.service-section.active {
-  display: block;
-  animation: fadeSlideIn 0.6s ease-out;
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+function switchToView(viewId) {
+  document.querySelectorAll(".view").forEach((section) => {
+    section.classList.remove("active");
+    section.style.display = "none";
+  });
+  const view = document.getElementById(viewId);
+  if (view) {
+    view.classList.add("active");
+    view.style.display = "block";
+  } else {
+    console.warn(`No view found with id: ${viewId}`);
   }
 }
 
-#admin-dashboard button {
-  padding: 0.25rem 0.6rem;
-  min-width: 60px;
-  max-width: fit-content;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  margin-left: 0.5rem; /* spacing between buttons */
-  cursor: pointer;
-  background: #63506a;
-  border: none;
-  color: #ebe5ed;
-  transition: background-color 0.3s ease;
+const dropdown = document.getElementById("role-dropdown");
+const btn = dropdown.querySelector(".dropdown-btn");
+const menu = dropdown.querySelector(".dropdown-menu");
+const hiddenInput = dropdown.querySelector("#role-select");
+
+
+const defaultValue = hiddenInput.value;
+const defaultLabel = menu.querySelector(
+  `li[data-value="${defaultValue}"]`
+).textContent;
+btn.textContent = defaultLabel;
+
+btn.addEventListener("click", () => {
+  dropdown.classList.toggle("open");
+});
+
+menu.querySelectorAll("li").forEach((item) => {
+  item.addEventListener("click", () => {
+    btn.textContent = item.textContent;
+    hiddenInput.value = item.getAttribute("data-value");
+    dropdown.classList.remove("open");
+  });
+});
+
+document.addEventListener("click", (e) => {
+  if (!dropdown.contains(e.target)) {
+    dropdown.classList.remove("open");
+  }
+});
+function showPanel(panelId) {
+  document.querySelectorAll(".admin-panel").forEach((p) => {
+    p.style.display = p.id === panelId ? "block" : "none";
+  });
 }
 
-#admin-dashboard button:hover {
-  background: #9c85b4;
+function logout() {
+
+  document.querySelectorAll(".view").forEach((view) => {
+    view.style.display = "none";
+  });
+
+
+  const login = document.getElementById("login-section");
+  if (login) {
+    login.style.display = "block";
+  } else {
+    console.error("login-section not found");
+  }
 }
 
-#location {
-  background-color: #6b5676;
-  color: #ebebeb;
-  padding: 2rem 3rem;
-  border-radius: 12px;
-}
+// Render on load
+renderAppointments();
+showStaffPanel("schedulePanel");
